@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button onclick="sendAjax()">sendAjax</button>
+    <div id="info"></div>
+    <button>fake</button>
+    <input type="text">
+
+    <script>
+        function sendAjax(){
+            //建立物件
+            const xml = new XMLHttpRequest();
+
+            //設定事件處理器
+            xml.onreadystatechange = function(){
+                console.log(xml.readyState, xml.status, xml.statusText);
+            } //過程
+            xml.onload = function(){
+                document.querySelector('#info').innerHTML = xml.responseText
+            } //結果
+
+            xml.open('GET', '/pending', true) //設定方法 路徑 預設true是非同步
+
+            //發送
+            xml.send()
+        }
+    </script>
+</body>
+</html>

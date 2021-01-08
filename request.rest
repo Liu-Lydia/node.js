@@ -1,0 +1,18 @@
+GET HTTP://localhost:3000
+
+###我是分隔線
+
+POST HTTP://localhost:3000/try-post
+Content-Type: application/json
+
+{
+    "name":"Bill",
+    "age":25
+}
+
+###我是分隔線
+
+POST HTTP://localhost:3000/try-post
+Content-Type: application/x-www-form-urlencoded
+
+name=Lydia&age=30

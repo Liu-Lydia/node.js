@@ -1,0 +1,30 @@
+<%- include('parts/html-head') %> <%- include('parts/navbar') %>
+
+<div class="container">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">NAME</th>
+        <th scope="col">AGE</th>
+      </tr>
+    </thead>
+    <tbody>
+      <%- sales.map(i=>{ return `
+      <tr>
+        <td>${i.id}</td>
+        <td>${i.name}</td>
+        <td>${i.age}</td>
+      </tr>
+      `; }).join('') %> <% for(let item of sales){ %>
+      <tr>
+        <td><%= item.id %></td>
+        <td><%= item.name %></td>
+        <td><%= item.age %></td>
+      </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('parts/scripts') %> <%- include('parts/html-foot') %>

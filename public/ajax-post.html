@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <input type="text" id="myinput" />
+    <button onclick="sendData()">send</button>
+    <div id="info"></div>
+
+    <script>
+      function sendData() {
+        const data = {
+          name: "Bill",
+          age: 25,
+        };
+        data.my = document.querySelector("#myinput").value;
+
+        //藉由try-post路由送出
+        fetch("/try-post", {
+          method: "POST", //傳送方法
+          body: JSON.stringify(data), //傳送內容
+          headers: {
+            "Content-Type": "application/Json",
+          }, //告訴後端headers檔頭是什麼,(application/Json)是一種固定寫法
+        })
+        .then(r => r.text()) //request回來後打包成text
+        .then(text => {
+            document.querySelector('#info').innerHTML = text;
+        }) //印出在畫面上
+      }
+    </script>
+  </body>
+</html>

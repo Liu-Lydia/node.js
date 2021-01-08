@@ -1,0 +1,39 @@
+<%- include('parts/html-head') %>
+<%- include('parts/navbar') %>
+
+<div class="container">
+  <form method="POST">
+    <!--都是同一支路由,所以不用action-->
+    <div class="form-group">
+      <label for="email">Email address</label>
+      <input
+        type="text"
+        class="form-control"
+        id="email"
+        aria-describedby="emailHelp"
+        name="email"
+      />
+      <% if(typeof email !== 'undefined') { %>
+      <small class="form-text text-muted"><%= email %></small>
+      <!--樣板裡有變數,路由就要有做處理-->
+    </div>
+    <% } %>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input
+        type="password"
+        class="form-control"
+        id="password"
+        name="password"
+      />
+      <!--locals是特殊物件,會作直接判斷,建議用這個-->
+      <% if(locals.password) { %>
+      <small class="form-text text-muted"><%= password %></small>
+      <% } %>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</div>
+
+<%- include('parts/scripts') %>
+<%- include('parts/html-foot') %>
