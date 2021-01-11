@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      //定義箭頭函式
+      const ff = async () => {
+        //非同步promise 只能將await包在內
+        //若沒捕捉錯誤(紅色的錯誤),錯誤就會被丟到全域,前端網頁會罷工
+        try {
+          await new Promise((resolve, reject) => {
+            console.log("111");
+            setTimeout(function () {
+              console.log("222");
+              reject("abc");
+            }, 500 + Math.random() * 1000);
+            console.log("333");
+          });
+        } catch (ex) {
+          console.log("ex:", ex);
+        }
+      };
+
+      //呼叫function
+      ff();
+
+      //   try{
+      //       throw new Error('errrrrr')
+      //   }catch(ex){
+      //       console.log(ex)
+      //   }
+    </script>
+  </body>
+</html>
