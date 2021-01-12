@@ -1,6 +1,15 @@
 require("dotenv").config(); //將設定檔引入
 
 const express = require("express");
+
+const session = require("express-session");
+const MysqlStore = require("express-mysql-session")(session); //session參數
+
+const moment = require("moment-timezone");
+
+const db = require(__dirname + "/modules/db_connect2");
+const sessionStore = new MysqlStore({}, db); //{}連線資料庫,上面有了所以不用放物件 但要放空物件
+
 const multer = require("multer");
 // const upload = multer({dest:'tmp_uploads/'}); //設定目的地資料夾 ,/ 有無皆可
 const upload = require(__dirname + "/modules/upload-imgs");
@@ -9,6 +18,19 @@ const app = express();
 
 //原則上set都要放最前面
 app.set("view engine", "ejs"); //註冊ejs
+
+//設定session
+app.use(
+  session({
+    secret: "fgfdgfssdfdsemhmh", //加密用的字串
+    saveUninitialized: false, //沒設定會warning,還沒初始化session要儲存嗎
+    resave: false, //沒變更內容是否強制存回
+    store: sessionStore, //存在哪(資料庫)
+    cookie: {
+      maxAge: 1800000, //可有可無 ,30分鐘(5個0)
+    },
+  })
+);
 
 app.use(express.static("public")); //在根目錄
 // app.use('/my', express.static('public'));
@@ -72,8 +94,72 @@ app.post("/try-upload", upload.single("avatar"), (req, res) => {
 
 //一次上傳多個檔案
 app.post("/try-upload2", upload.array("photo"), (req, res) => {
-    res.json(req.files)
+  res.json(req.files);
+});
+
+//Router處理,這個比下面的嚴謹
+app.get("/my-params1/:action/:id", (req, res) => {
+  res.json(req.params);
+});
+
+app.get("/my-params2/:action?/:id?", (req, res) => {
+  res.json(req.params);
+});
+
+//設定規則
+app.get(/^\/m\/09\d{2}-?\d{3}-?\d{3}$/i, (req, res) => {
+  let u = req.url.slice(3);
+  u = u.split("?")[0]; //query string
+  // u = u.split('-').join(''); //Array用法
+  u = u.replace(/-/g, ""); //g全域 obj用法
+  res.send(u);
+});
+
+app.use("/ttt", require(__dirname + "/routes/admins2")); //route本身就是middleware
+
+app.use("/", require(__dirname + "/routes/admins2")); // '/'有跟沒有一樣,與上面是同個router處理
+
+app.get("/try-session", (req, res) => {
+  req.session.my_var = req.session.my_var || 0; //有無session 預設為0
+  req.session.my_var++;
+  res.json({
+    my_var: req.session.my_var,
+    session: req.session,
   });
+});
+
+app.get("/try-moment", (req, res) => {
+  const fm = "YYYY-MM-DD HH:mm:ss";
+  const m1 = moment();
+  const m2 = moment("02/29/20", "MM/DD/YY");
+  res.json({
+    m1: m1.format(fm),
+    m1a: m1.tz("Europe/London").format(fm),
+    m2: m2.format(fm),
+    m2a: m2.tz("Europe/London").format(fm),
+  });
+});
+
+// app.get("/try-db", (req, res) => {
+//   db.query(
+//     "SELECT * FROM `address_book` ORDER BY `address_book`.`sid` DESC LIMIT 6"
+//   ) //promise是陣列[]
+    //rows取第1筆資料
+    // .then(([rows]) => {
+      //沒回應會一直padding
+//       res.json(rows);
+//     });
+// });
+
+app.get("/try-db", async (req, res) => {
+  const [rows] = await db.query(
+    "SELECT * FROM `address_book` ORDER BY `address_book`.`sid` DESC LIMIT 6"
+  )
+   res.json(rows)
+});
+
+//第一個address-book是路由模組,第二個是路徑
+app.use('/address-book', require(__dirname + '/routes/address-book'));
 
 //錯誤訊息放在所有路由的後面
 app.use((req, res) => {
