@@ -1,0 +1,112 @@
+<%- include('../parts/html-head') %> 
+<%- include('../parts/navbar') %>
+
+<style>
+    form small.error-msg {
+        color: red;
+    }
+</style>
+
+<div class="container">
+    <div class="row d-flex justify-content-center">
+        <div class="col-lg-6">
+
+            <div class="alert alert-danger" role="alert" id="info" style="display:none">錯誤</div>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">新增通訊錄</h5>
+
+                    <form name="form1" novalidate onsubmit="CheckForm();return false;">
+
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required pattern="[A-Z]*">
+                            <small class="form-text error-msg" style="display : none"></small>
+
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="email" name="email">
+                            <small class="form-text error-msg" style="display : none"></small>
+
+                        </div>
+                        <div class="form-group">
+                            <label for="mobile">Mobile</label>
+                            <input type="text" class="form-control" id="mobile" name="mobile" pattern="09\d{2}-?\d{3}-?\d{3}">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="birthday">Birthday</label>
+                            <input type="date" class="form-control" id="birthday" name="birthday">
+                        </div>
+                        <div class="form-group">
+                            <label for="address">Address</label>
+                            <textarea class="form-control" id="address" name="address" col="30" row="3"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../parts/scripts') %> 
+
+<script>
+    const info = document.querySelector('#info');
+
+    const name = document.querySelector('#name');
+    const email = document.querySelector('#email');
+    const email_re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+
+    function CheckForm() {
+        info.style.display = 'none';
+        let isPass = true;
+        //先將其設定為通過
+
+        name.style.borderColor = '#CCCCCC';
+        name.closest('.form-group').querySelector('small').style.display = 'none';
+        email.style.borderColor = '#CCCCCC';
+        email.closest('.form-group').querySelector('small').style.display = 'none';
+        // 恢復設定
+
+        if (name.value < 2) {
+            isPass = false;
+            //任何一項沒通過就會false
+
+            name.style.borderColor = 'red';
+            let small = name.closest('.form-group').querySelector('small');
+            small.innerText = "請輸入正確的名字";
+            small.style.display = 'block';
+        }
+
+        if (isPass) {
+            const fd = new FormData(document.form1);
+
+            fetch('', {
+                    method: 'POST',
+                    body: fd
+                })
+                .then(r => r.json())
+                .then(obj => {
+                    console.log(obj);
+
+                    if(obj.success){
+                        info.classList.remove('alert-danger');
+                        info.classList.add('alert-success');
+                        info.innerHTML = '新增成功';
+                    }else{
+                        info.classList.remove('alert-success');
+                        info.classList.add('alert-danger');
+                        info.innerHTML = obj.error || '新增失敗';
+                    }
+                    info.style.display="block";
+                });
+        }
+
+    }
+</script>
+
+<%- include('../parts/html-foot') %>

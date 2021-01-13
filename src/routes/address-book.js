@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require(__dirname + "/../modules/db_connect2");
 
-router.use(async (req, res, next) => {
+router.get('/list', async (req, res) => {
   //   const output = {
   //     perPage: 10, //一頁幾筆
   //   };
@@ -22,35 +22,46 @@ router.use(async (req, res, next) => {
 
   let page = parseInt(req.query.page) || 1; //頁面=整數
 
+  let rows = []; //在外面宣告rows 
+  if(totalRows > 0){
+    if(page < 0) page = 1;
+    //{return res.redirect('/address-book/list');}
+    if(page > totalPages) page = totalPages;
+    //{return res.redirect(`/address-book/list?page=${totalPages}`);}
+
+    [rows] = await db.query(
+      "SELECT * FROM `address_book` ORDER BY `address_book`.`sid` DESC LIMIT ?, ?",
+      [(page - 1) * perPage, perPage] 
+    );
+  }
+
   //   const [rows] = await db.query(
   //     "SELECT * FROM `address_book` ORDER BY `address_book`.`sid` DESC LIMIT ?, ?",
   //     [(page - 1) * output.perPage, output.perPage] //從第幾筆開始,幾筆
   //   );
 
-  const [rows] = await db.query(
-    "SELECT * FROM `address_book` ORDER BY `address_book`.`sid` DESC LIMIT ?, ?",
-    [(page - 1) * perPage, perPage] //從第幾筆開始,幾筆
-  );
+  // const [rows] = await db.query(
+  //   "SELECT * FROM `address_book` ORDER BY `address_book`.`sid` DESC LIMIT ?, ?",
+  //   [(page - 1) * perPage, perPage] //從第幾筆開始,幾筆
+  // );
 
   //   output.rows = rows;
-  res.json({
+
+  res.render('address-book/list', {
     perPage,
     totalRows,
     totalPages,
+    page,
     rows,
   });
-  next();
+
+  // res.json({
+  //   perPage,
+  //   totalRows,
+  //   totalPages,
+  //   rows,
+  // });
+
 });
-
-const handle1 = (req, res) => {
-  res.json({
-    params: req.params,
-    url: req.url,
-    baseUrl: req.baseUrl, //基底url
-    locals: res.locals,
-  });
-};
-
-router.get("/address-book/:p1?/:p2?", handle1);
 
 module.exports = router;

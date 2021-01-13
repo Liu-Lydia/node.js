@@ -32,6 +32,12 @@ app.use(
   })
 );
 
+app.use((req, res, next) => {
+  res.locals.baseUrl = req.baseUrl;
+  res.locals.url = req.url;
+  next();
+});
+
 app.use(express.static("public")); //在根目錄
 // app.use('/my', express.static('public'));
 
@@ -160,6 +166,10 @@ app.get("/try-db", async (req, res) => {
 
 //第一個address-book是路由模組,第二個是路徑
 app.use('/address-book', require(__dirname + '/routes/address-book'));
+
+app.use('/address-book2', require(__dirname + '/routes/address-book2'));
+
+app.use('/address-book3', require(__dirname + '/routes/address-book3'));
 
 //錯誤訊息放在所有路由的後面
 app.use((req, res) => {
