@@ -24,10 +24,10 @@ router.get('/list', async (req, res) => {
 
   let rows = []; //在外面宣告rows 
   if(totalRows > 0){
-    if(page < 0) page = 1;
-    //{return res.redirect('/address-book/list');}
-    if(page > totalPages) page = totalPages;
-    //{return res.redirect(`/address-book/list?page=${totalPages}`);}
+    if(page < 0) //page = 1;
+    {return res.redirect('/address-book/list');}
+    if(page > totalPages) //page = totalPages;
+    {return res.redirect(`/address-book/list?page=${totalPages}`);}
 
     [rows] = await db.query(
       "SELECT * FROM `address_book` ORDER BY `address_book`.`sid` DESC LIMIT ?, ?",

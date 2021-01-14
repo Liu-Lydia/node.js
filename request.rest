@@ -16,3 +16,20 @@ POST HTTP://localhost:3000/try-post
 Content-Type: application/x-www-form-urlencoded
 
 name=Lydia&age=30
+
+###JWT登入測試
+
+POST HTTP://localhost:3000/login-jwt
+Content-Type: application/json
+
+{"account":"Qoo", "password":"123456"}
+
+###verify
+
+POST HTTP://localhost:3000/verify-jwt
+Content-Type: application/json
+
+{"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaWQiOjMsImF2YXRhciI6IjVmZGIxNGVkYjUxNmUuanBnIiwibmlja25hbWUiOiJyZmZmIiwiYWNjb3VudCI6IlFvbyIsInBhc3N3b3JkIjoiN2M0YThkMDljYTM3NjJhZjYxZTU5NTIwOTQzZGMyNjQ5NGY4OTQxYiIsImNyZWF0X3RpbWUiOiIyMDIwLTEyLTE1VDA2OjEzOjM5LjAwMFoiLCJpYXQiOjE2MTA2MTMzMDJ9.NOzF5UOJJ5te4vFB1gmzaFEraeGwIwJssL6N-9WCbaE"
+}
+
+

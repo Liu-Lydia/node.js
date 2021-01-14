@@ -2,6 +2,14 @@ require("dotenv").config(); //將設定檔引入
 
 const express = require("express");
 
+const cors = require("cors");
+
+const axios = require("axios");
+
+const cheerio = require("cheerio");
+
+const jwt = require('jsonwebtoken');
+
 const session = require("express-session");
 const MysqlStore = require("express-mysql-session")(session); //session參數
 
@@ -32,9 +40,21 @@ app.use(
   })
 );
 
+//Access-Control-Allow-Credentials: true
+const corsOptions = {
+  credentials: true,
+  origin: function(origin, cb){
+    console.log('origin:', origin);
+    cb(null, true);
+  }
+}
+
+app.use(cors(corsOptions));  //Access-Control-Allow-Origin: *接受所有主機res
+
 app.use((req, res, next) => {
   res.locals.baseUrl = req.baseUrl;
   res.locals.url = req.url;
+  res.locals.sess = req.session;
   next();
 });
 
@@ -45,10 +65,14 @@ app.use(express.static("public")); //在根目錄
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-//有設定路由
 app.get("/", (req, res) => {
-  res.send("Hello");
+  res.render("a", { name: "Lydia" });
 });
+
+//有設定路由
+// app.get("/", (req, res) => {
+//   res.send("Hello");
+// });
 
 //建立樣板引擎
 app.get("/try-ejs", (req, res) => {
@@ -150,9 +174,9 @@ app.get("/try-moment", (req, res) => {
 //   db.query(
 //     "SELECT * FROM `address_book` ORDER BY `address_book`.`sid` DESC LIMIT 6"
 //   ) //promise是陣列[]
-    //rows取第1筆資料
-    // .then(([rows]) => {
-      //沒回應會一直padding
+//rows取第1筆資料
+// .then(([rows]) => {
+//沒回應會一直padding
 //       res.json(rows);
 //     });
 // });
@@ -160,16 +184,114 @@ app.get("/try-moment", (req, res) => {
 app.get("/try-db", async (req, res) => {
   const [rows] = await db.query(
     "SELECT * FROM `address_book` ORDER BY `address_book`.`sid` DESC LIMIT 6"
-  )
-   res.json(rows)
+  );
+  res.json(rows);
 });
 
 //第一個address-book是路由模組,第二個是路徑
-app.use('/address-book', require(__dirname + '/routes/address-book'));
+app.use("/address-book", require(__dirname + "/routes/address-book"));
 
-app.use('/address-book2', require(__dirname + '/routes/address-book2'));
+app.use("/address-book2", require(__dirname + "/routes/address-book2"));
 
-app.use('/address-book3', require(__dirname + '/routes/address-book3'));
+app.use("/address-book3", require(__dirname + "/routes/address-book3"));
+
+app.get("/login", async (req, res) => {
+  res.render("login");
+});
+
+app.post("/login", upload.none(), async (req, res) => {
+  const [rows] = await db.query(
+    "SELECT * FROM `admin` WHERE account=? AND password=SHA1(?)",
+    [req.body.account, req.body.password]
+  );
+
+  if (rows.length === 1) {
+    req.session.admin = rows[0]; //admin是自己取的
+    res.json({
+      success: true,
+    });
+  }else{
+    res.json({
+      success: false,
+      body: req.body,
+    })
+  }
+});
+
+app.post("/login-jwt", async (req, res) => {
+  const [rows] = await db.query(
+    "SELECT * FROM `admin` WHERE account=? AND password=SHA1(?)",
+    [req.body.account, req.body.password]
+  );
+
+  if (rows.length === 1) {
+    const token = jwt.sign({...rows[0]}, process.env.JWT_KEY); //加密
+    res.json({
+      success: true,
+      token,
+    });
+  }else{
+    res.json({
+      success: false,
+      body: req.body,
+    })
+  }
+});
+
+app.post("/verify-jwt", async (req, res) => {
+  jwt.verify(req.body.token, process.env.JWT_KEY, (error, payload) => {
+if(error){
+  res.json({error});
+}else{
+  res.json(payload);
+}
+})
+})
+
+app.post("/verify-jwt", async (req, res) => {
+  jwt.verify(req.body.token, process.env.JWT_KEY, (error, payload) => {
+if(error){
+  res.json({error});
+}else{
+  res.json(payload);
+}
+})
+})
+
+// https://bitbucket.org/lsd0125/mfee09-nodejs/src/b048607a7de353e58e5e45f12c83763bc0d9184a/public/set_jwt_token.html
+app.post('/verify2-jwt', async (req, res)=>{
+  let token = req.get('Authorization');
+  if(token.indexOf('Bearer ')===0){
+      token = token.slice(7);
+      jwt.verify(token, process.env.JWT_KEY, (error, payload)=>{
+          if(error){
+              res.json({error});
+          } else {
+              res.json(payload);
+          }
+      })
+  } else {
+      res.json({error: 'bad bearer token'});
+  }
+
+app.get("/logout", async (req, res) => {
+  delete req.session.admin;
+  res.redirect('/');
+});
+
+app.get('/yahoo', async (req, res) => {
+  const response = await axios.get('https://www.104.com.tw/jobs/main/');
+  res.send(response.data);
+})
+
+app.get('/yahoo2', async (req, res) => {
+  const response = await axios.get('https://tw.yahoo.com');
+  const $ = cheerio.load(response.data);
+  $('img').each(function(i, el){
+    res.write(el.attribs.src + '\n');
+  })
+  res.end('');
+})
 
 //錯誤訊息放在所有路由的後面
 app.use((req, res) => {

@@ -6,6 +6,10 @@ const db = require(__dirname + "/../modules/db_connect2");
 
 //middleware 不同模組各自處理
 router.use((req, res, next) => {
+  //判斷是不是管理者,否則跳轉至首頁
+  if(! req.session.admin){
+    return res.redirect('/'); //判斷完直接跳開不執行下面步驟了
+  }
   res.locals.baseUrl = req.baseUrl;
   res.locals.url = req.url;
   next();
