@@ -273,6 +273,7 @@ app.post('/verify2-jwt', async (req, res)=>{
   } else {
       res.json({error: 'bad bearer token'});
   }
+});
 
 app.get("/logout", async (req, res) => {
   delete req.session.admin;
